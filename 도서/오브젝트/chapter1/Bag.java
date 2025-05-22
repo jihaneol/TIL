@@ -16,14 +16,25 @@ public class Bag {
     public boolean hasInvitation(){
         return invitation != null;
     }
-    public void setTicket(Ticket ticket){
+    private void setTicket(Ticket ticket){
         this.ticket = ticket;
     }
 
-    public void minusAmount(Long fee) {
+    private void minusAmount(Long fee) {
         this.amount -= fee;
     }
     public void plusAmount(Long fee){
         this.amount += fee;
+    }
+
+    public Long hold(Ticket ticket) {
+        if(hasInvitation()) {
+            setTicket(ticket);
+            return 0L;
+        }else{
+            minusAmount(ticket.getFee());
+            setTicket(ticket);
+            return ticket.getFee();
+        }
     }
 }

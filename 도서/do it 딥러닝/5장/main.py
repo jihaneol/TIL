@@ -18,7 +18,6 @@ plt.xlabel('feature')
 plt.ylabel('value')
 plt.show()
 
-print(x_train.shape[1])
 layer = Single()
 layer.fit(x_train, y_train)
 layer.score(x_val, y_val)

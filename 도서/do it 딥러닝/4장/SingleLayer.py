@@ -14,7 +14,7 @@ class Single:
         b_grad = 1*err
         return w_grad, b_grad
     
-    def fit(self, x,y, epochs=100):
+    def fit(self, x,y, epochs=100)
         self.w = np.ones(x.shape[1])
         self.b = 0
         for i in range(epochs):

@@ -12,12 +12,22 @@ x_train_all, x_test, y_train_all, y_test = train_test_split(x,y,stratify=y, test
 
 x_train, x_val, y_train, y_val = train_test_split(x_train_all, y_train_all, stratify=y_train_all, test_size=0.2, random_state=42)
 
-print(cancer.feature_names[[2,3]])
-plt.boxplot(x_train[:, 2:4])
-plt.xlabel('feature')
-plt.ylabel('value')
-plt.show()
+# 훈련 스케일 맞추기
+train_mean = np.mean(x_train, axis=0)
+train_std = np.std(x_train, axis=0)
+x_train_scaled = (x_train - train_mean) / train_std
+
+# 검증 스케일 맞추기
+x_val_scaled = (x_val - train_mean) / train_std
 
 layer = Single()
-layer.fit(x_train, y_train)
-layer.score(x_val, y_val)
+layer.fit(x_train_scaled, y_train ,x_val=x_val_scaled, y_val=y_val)
+plt.ylim(0, 0.3)
+plt.plot(layer.losses)
+plt.plot(layer.val_losses)
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train_loss', 'val_loss'])
+plt.show()
+
+print(layer.score(x_val_scaled, y_val))

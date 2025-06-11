@@ -23,4 +23,8 @@ public class Money {
     public Money minus(Money amount) {
         return new Money(this.amount.subtract(amount.amount));
     }
+
+    public void plus(Money money) {
+
+    }
 }

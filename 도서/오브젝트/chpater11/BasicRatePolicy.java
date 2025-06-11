@@ -1,5 +1,7 @@
 package chpater11;
 
+import chapter2.Money;
+
 abstract class BasicRatePolicy {
 
     public Money caluculateFee(Phone phone){

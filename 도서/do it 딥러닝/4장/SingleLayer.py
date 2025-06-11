@@ -35,6 +35,8 @@ class Single:
                 loss += -(y[i]*np.log(a)+(1-y[i])*np.log(1-a))
             
             self.losses.append(loss/len(y))
+            df
+
     
     def activation(self, z):
         z = np.clip(z, -100, None) #안전한 np.exp를 위해

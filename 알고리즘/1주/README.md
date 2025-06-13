@@ -89,7 +89,7 @@ public int[] solution(int[] numbers) {
 
 set으로 할 수 있다.
 ## 문제 4 모의 고사
-
+https://school.programmers.co.kr/learn/courses/30/lessons/42840
 ### 문제 분석하기
 1. 수포자 index와 answers index 맞춰서 비교하기
 2. 같으면 수포자의 count 증가
@@ -133,7 +133,7 @@ private int[] supo1 = {1,2,3,4,5};
 patterns로 2차원 배열 만들어서 해도 된다.
 
 ## 문제 5 행렬의 곱셈
-
+https://school.programmers.co.kr/learn/courses/30/lessons/12949
 ### 문제 분석하기
 1. arr1 x,m 만들기
 2. arr2 y 만들기
@@ -162,3 +162,132 @@ n ** 3
 ```
 
 ## 문제 6 실패율
+https://school.programmers.co.kr/learn/courses/30/lessons/42889
+### 문제 분석하기
+1. 스테이지별 도전자 수를 구함
+int[] challenger = int[] failArr
+1. 각 스테이지 실패율 구하기
+Fail
+2. 실패율 내림차순 같으면 스테이지 오름차순 스테이지만 출력
+
+### 시간 복잡도 
+정렬 nlogn + 각 도전자수  n + 실패율 계산 n + 스테이지 정답 구할 때 n
+
+### 코드
+```java
+class Solution {
+    public int[] solution(int N, int[] stages) {
+   
+        // 각 스테이지별 도전자 수 저장
+        int[] failArr = new int[N+2];
+        
+        for(int stage : stages){
+            failArr[stage]++;
+        }
+        
+        List<Fail> fails= new ArrayList();
+        
+        double len = stages.length;
+        
+        // 실패율 계산
+        for(int i=1; i<=N; i++){
+            
+            int num = failArr[i];
+        
+            if(num==0){
+                fails.add(new Fail(i, 0.0));
+            }
+            else {
+                fails.add(new Fail(i, num/len));
+                len -= failArr[i]; 
+            }
+        }
+       
+        // 정렬
+        Collections.sort(list);
+        
+        return list.stream().mapToInt(Fail :: getStage).toArray();
+    }
+}
+class Fail implements Comparable<Fail>{
+   private int stage;
+   private double rate;
+
+   Fail(int s, double r){
+      stage = s;
+      rate = r;
+   }
+
+   public int getStage(){
+      return stage;
+   }
+
+   public int compareTo(Fail f){
+      return Double.compare(f.rate, rate) == 0
+              ? Integer.compare(stage, f.stage)
+              : Double.compare(f.rate, rate);
+   }
+}
+```
+
+## 생각할거
+다음 스테이지 이동한 사용자가 없으면 0/0이 된다.
+
+이 부분을 생각하고 작성을 했어야 했다.
+
+# 문제 7 방문 길이
+https://school.programmers.co.kr/learn/courses/30/lessons/49994
+
+## 분석하기
+지나온 길을 어떻게 처리할 것 인가?
+
+hashSet<String> 으로 지나온 경로를 넣어준다.
+
+## 시간 복잡도
+dirs 길이 n
+## 코드
+```java
+import java.util.*;
+class Solution {
+    
+    private int[][] location = {{-1,0},{0,1},{1,0},{0,-1}}; // 위, 오, 아, 왼
+    
+    public int solution(String dirs) {
+        
+        int x = 5, y=5;
+        
+        Set<String> pass = new HashSet();
+        
+        for(char dir : dirs.toCharArray()){
+            
+            int d = charToInt(dir);
+
+            int nx = location[d][0] + x;
+            int ny = location[d][1] + y;
+            
+            if(!isRange(nx, ny)) continue;
+            
+            pass.add(nx + " " + ny + " " + x + " "+ y);
+            pass.add(x + " " + y + " " + nx + " "+ ny);
+            
+            x = nx;
+            y = ny;
+        }
+        
+        return pass.size()/2;
+    }
+    
+    public int charToInt(char c){
+        return switch(c){
+                case 'U' -> 0;
+                case 'R' -> 1;
+                case 'D' -> 2;
+                default -> 3;
+        };
+    }
+    
+    public boolean isRange(int x, int y){
+        return x>=0 && y>=0 && x<11 && y<11;
+    }
+}
+```

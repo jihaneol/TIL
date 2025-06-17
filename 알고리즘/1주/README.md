@@ -291,3 +291,98 @@ class Solution {
     }
 }
 ```
+
+
+# 스택
+FILO 선입선출
+
+# 문제 8 올바른 괄호
+
+## 코드
+```java
+ boolean solution(String s) {
+        int front = 0;
+        
+        for(char word : s.toCharArray()){
+            if(word=='('){
+               front++; 
+            }else if(front>0 && word==')'){
+                front--;
+            }else{
+                return false;
+            }
+        }
+
+        return front==0;
+    }
+```
+
+# 문제 9 10진수를 2진수로 변환하기
+
+## 풀이
+1. 10진수 N을 2로 나눈 나머지를 저장하고 N은 2로 나눔
+2. 몫이 0이 아니라면 나머지를 버리고 다시 1을 수행
+3. 모든 과정이 끝나고 1에서 저장한 수를 뒤부터 순서대로 가져와 붙이기
+
+## 코드
+````java
+Integer.parseInt(10, 2);
+Charac
+
+
+````
+
+# 문제 10 괄호 회전하기
+
+## 풀이
+1. s칸 길이 만큼 회전하기
+2. 올바른 괄호인지 확인하기
+
+
+## 코드
+
+```java
+public int solution(String s) {
+        int answer = 0;
+        Map<Character, Character> map = new HashMap();
+        map.put('{','}');
+        map.put('(',')');
+        map.put('[',']');
+        for(int i=0; i<s.length(); i++){
+            Stack<Character> stack = new Stack();
+            boolean flag = true; // 올바른 괄호인지
+            for(char word : s.toCharArray()){
+                if('{'==word || '('==word || '['==word){
+                    stack.push(word); 
+                }else{
+                    if(stack.isEmpty() || map.get(stack.pop())!=word) {
+                        flag = false;
+                        break;
+                    }
+                }
+            }
+            if(stack.isEmpty() && flag) answer++;
+            char temp = s.charAt(0);
+            s = s.substring(1, s.length()) + temp;
+            
+        }
+        
+        return answer;
+    }
+```
+
+```java
+if('{'==word || '('==word || '['==word)
+이 부분을
+if(map.containsKey(word)) 로 대체 가능
+
+char temp = s.charAt(0);
+s = s.substring(1, s.length()) + temp;
+
+이 부분을 처음에 
+s +=s로 뒤에 붙혀주고 
+int len = s.length()로 단어 길이 맞춰준 후
+
+인덱스로 길이 맞추면서 확인하면 더 빠르다.
+```
+

@@ -385,4 +385,105 @@ int len = s.length()로 단어 길이 맞춰준 후
 
 인덱스로 길이 맞추면서 확인하면 더 빠르다.
 ```
+# 문제 11 짝지어 제거하기
 
+https://school.programmers.co.kr/learn/courses/30/lessons/12973
+
+## 코드
+```java
+  public int solution(String s)
+    {
+        Deque<Character> stack = new ArrayDeque();
+        
+        for(char word : s.toCharArray()){
+            if(stack.isEmpty()){
+                stack.push(word);
+            }else if(stack.peek()==word){
+                stack.pop();
+            }else{
+                stack.push(word);
+            }
+        }
+
+        return stack.size()==0?1:0;
+    }
+```
+
+# 문제 12 주식 가격
+
+
+https://school.programmers.co.kr/learn/courses/30/lessons/42584
+
+## 문제 분석
+1. 현재 주식보다 이전 주식의 가격이 높으면 이전 주식의 길이를 확정
+2. 이전 주식들을 하나씩 보고 현재보다 큰 주식 가격 주식이 있다면 이전 주식 확정
+3. 2를 완료후 현재 주식 넣어놓기
+
+```java
+import java.util.*;
+class Stuck{
+    int idx, price;
+    Stuck(int i, int p){
+        idx = i;
+        price = p;
+    }
+}
+class Solution {
+    public int[] solution(int[] prices) {
+        int[] answer = new int[prices.length];
+        Stack<Stuck> stack = new Stack();
+        
+        for(int i=0; i<prices.length; i++){
+            int price = prices[i];
+                
+            while(!stack.isEmpty() && stack.peek().price>price){
+                Stuck pre = stack.pop();
+                answer[pre.idx] = i-pre.idx;
+            }
+            stack.push(new Stuck(i, price));
+        }
+        
+        // 나머지
+        while(!stack.isEmpty()){
+            Stuck now = stack.pop();
+            answer[now.idx] = prices.length - now.idx-1;
+        }
+        return answer;
+    }
+}
+```
+
+# 문제 13 크레인 인형 뽑기 게임
+## 코드
+```java
+class Solution {
+    public int solution(int[][] board, int[] moves) {
+        int answer = 0;
+        Stack<Integer> stack = new Stack();
+        
+        for(int move : moves){
+            int col = move - 1;
+            
+            // 크레인 뽑기
+            for(int row=0; row<board.length; row++){
+                if(board[row][col]!=0){
+                    int doll = board[row][col];
+                    board[row][col] = 0;
+                    if(!stack.isEmpty() && stack.peek()==doll){
+                        stack.pop();
+                        answer++;
+                    }else{
+                        stack.push(doll);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        return answer*2;
+    }
+}
+```
+board 크기와 moves 길이 커지면 row를 0부터 보지않고 col에 해당하는 row를 저장해서 바로 시작할 수 있게 하면된다.
+
+# 문제 14 표 편집

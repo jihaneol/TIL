@@ -1,4 +1,4 @@
-# 1주 알고리즘 문제 풀이
+# 1~2주 알고리즘 문제 풀이
 
 ## 아는 것과 모르는 것을 명확하게
 
@@ -637,6 +637,8 @@ class Solution {
 
 # 문제 17 카드 뭉치
 
+https://school.programmers.co.kr/learn/courses/30/lessons/159994
+
 ```java
 class Solution {
     public String solution(String[] cards1, String[] cards2, String[] goal) {
@@ -656,10 +658,4 @@ class Solution {
     }
 }
 ```
-
 ArrayDeque 에는 peekFirst 이런 메소드가있다. stack의 peek과 같다.
-
-
-# 해시
-
-

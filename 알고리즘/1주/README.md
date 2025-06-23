@@ -479,7 +479,9 @@ class Solution {
                 }
             }
         }
-        
+       "".equals
+       Character 
+        Integer.pareInt('C');
         return answer*2;
     }
 }
@@ -487,3 +489,177 @@ class Solution {
 board 크기와 moves 길이 커지면 row를 0부터 보지않고 col에 해당하는 row를 저장해서 바로 시작할 수 있게 하면된다.
 
 # 문제 14 표 편집
+
+## 문제 분석
+현재 위치에서 연결된 위, 아래 행들을 기록한다.
+
+```java
+import java.util.*;
+
+class Solution {
+
+   public String solution(int n, int k, String[] cmd) {
+
+      /**
+
+       up down 으로 실제 위치 저장하는 배열을 만든다.
+
+       삭제 시킨거는 stack으로 처리
+
+       **/
+
+      int[] up = new int[n+2];
+      int[] down = new int[n+2];
+
+      for(int  i  = 0; i<n+2; i++){
+         up[i] = i - 1;
+         down[i] = i + 1;
+      }
+
+      Stack<Integer> deleted = new Stack();
+      char[] answer = new char[n];
+      Arrays.fill(answer,'O');
+      k++;
+
+      for(String c : cmd){
+
+
+         if(c.charAt(0) == 'C'){
+            deleted.push(k);
+            answer[k-1] = 'X';
+            up[down[k]] = up[k];
+            down[up[k]] = down[k];
+            k = n<down[k] ? up[k] : down[k];
+
+
+         }
+
+         else if(c.charAt(0) == 'Z'){
+            int restore = deleted.pop();
+            answer[restore-1] = 'O';
+            down[up[restore]] = restore;
+            up[down[restore]] = restore;
+         }
+
+         else {
+            String[] split = c.split(" ");
+            int num = Integer.parseInt(split[1]);
+            for(int i=0; i<num; i++){
+               k = "U".equals(split[0]) ? up[k] : down[k];
+            }
+         }
+      }
+
+      return new String(answer);
+
+   }
+}
+```
+
+# 큐
+FIFO
+
+rear 뒤에서 값을 삽입, front 앞에서 값을 빼온다.
+
+## 특성 활용
+작업 대기열, 이벤트 처리
+
+## 메소드
+ArrayDequeue
+
+double ended queue
+
+addFirst() 앞 , addLast() 뒤
+
+큐는 뒤에서 삽입(add)해서 앞으로(poll) 출력한다.
+
+# 문제 15 요세푸스 문제
+
+## 문제 분석
+큐를 사용하지 않고 수학 공식으로 풀어보자
+
+f(n, k) = (f(n - 1, k) + k) % n
+
+n명의 사람 중에서 k번째 사람을 제거해나갈 때 마지막에 남는 사람의 위치
+
+초기값: f(1, k) = 0
+
+# 문제 16 기능 개발
+
+## 코드
+```java
+import java.util.*;
+class Solution {
+    public int[] solution(int[] progresses, int[] speeds) {
+        List<Integer> answer = new ArrayList();
+        Queue<Integer> dev = new ArrayDeque();
+        /**
+        처음 부터 progresses, speeds를 개산하여 앞에서 부터 배포 가능 날짜를 q에 넣는다.
+        q를 빼오면서 첫번째랑 그 뒤에 날짜를 비교한다.
+        
+        첫번째 < 뒷번째 라면 2<7 이라면 2일은 배포 1번 7을 첫번째로 바꾼다.
+        7>=뒷번째들 , 7>= 2,3,4 이라면 배포 개수는 4이다.
+        7<뒷번째가 되면 지금까지 배포한 4개를 answer에 넣는다.
+        
+        queue가 비었다면 지금까지 배포한것을 answer에 넣는다.
+        **/
+        for(int i=0; i<progresses.length; i++){
+            int p = progresses[i];
+            int s = speeds[i];
+            
+            dev.add(
+                (100-p)>s*((100-p)/s)? (100-p)/s + 1: (100-p)/s
+            );
+        }
+        int init = dev.poll();
+        int cnt = 1;
+        while(!dev.isEmpty()){
+            int value = dev.poll();
+            if(init>=value){
+                cnt++;
+            }else{
+                answer.add(cnt);
+                cnt=1;
+                init = value;
+            }
+        }
+        
+        answer.add(cnt);
+        
+        
+        return answer.stream().mapToInt(Integer::intValue).toArray();
+    }
+}
+```
+(100-p)>s*((100-p)/s)? (100-p)/s + 1: (100-p)/s 이걸
+
+((100 - p) + s - 1) / s 이렇게 하면 된다. 올림 처리해주는 공식
+
+# 문제 17 카드 뭉치
+
+```java
+class Solution {
+    public String solution(String[] cards1, String[] cards2, String[] goal) {
+        int idx1 = 0;
+        int idx2 = 0;
+        for(int i=0; i<goal.length; i++){
+            
+            if(idx1<cards1.length && goal[i].equals(cards1[idx1])){
+                idx1++;
+            }else if(idx2<cards2.length && goal[i].equals(cards2[idx2])){
+                idx2++;
+            }else{
+                return "No";
+            }
+        }
+        return "Yes";
+    }
+}
+```
+
+ArrayDeque 에는 peekFirst 이런 메소드가있다. stack의 peek과 같다.
+
+
+# 해시
+
+

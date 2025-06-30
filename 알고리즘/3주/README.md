@@ -281,3 +281,168 @@ ordered 스트림을 sorted 메서드로 정렬하면 정렬 기준의 값이 �
 | `Arrays.sort(int[])`, etc. (기본형) | ❌ Unstable         |
 
 
+# 문제 23 신고 결과 받기
+https://school.programmers.co.kr/learn/courses/30/lessons/92334?language=java
+## 문제 분석
+1. 신고자가 k명 이상인지 확인
+2. 신고자가 k명 이상이면 신고자의 결과 통보 메일 수신 횟수 +1
+
+## 코드
+```java
+import java.util.*;
+class Solution {
+    public int[] solution(String[] id_list, String[] report, int k) {
+        /**
+        신고된 유저, 신고당한 횟수
+        유저, 유저가 신고한 id
+        
+        각 유저가 받은 메일 수 return
+        **/
+        
+        int[] answer = new int[id_list.length];
+        Map<String, Integer> banMap = new HashMap();
+        Map<String, List<String>> userMap = new HashMap();
+        Set<String> set = new HashSet();
+        // 신고하기
+        for(String r : report){
+            if(set.contains(r)){
+                continue;
+            }
+            set.add(r);
+            String[] split = r.split(" ");
+            String user = split[0];
+            String banId = split[1];
+            
+            banMap.put(banId, banMap.getOrDefault(banId, 0)+1);
+            if(!userMap.containsKey(user)){
+                userMap.put(user, new ArrayList());
+            }
+            userMap.get(user).add(banId);
+        }
+        
+        // 계산하기
+        for(int i=0; i<id_list.length; i++){
+            String user = id_list[i];
+            int count = 0;
+            if(!userMap.containsKey(user)){
+                answer[i] = count;
+                continue;
+            }
+            
+            for(String banId : userMap.get(user)){
+                if(banMap.get(banId)>=k){
+                    count++;
+                }
+            }
+            
+            answer[i] = count;
+
+        }
+        
+        
+        
+        return answer;
+    }
+}
+```
+여기서 생각을 <신고한 사람, 신고 당한 사람 리스트>로 하고
+
+<신고 당한 사람, 횟수> 이렇게 한번에 하면 나중에 if문이 추가된다. 
+
+이유는 중복이 이러나기 때문이다. 이를 해결하기 위해 또 set이 필요하니 나눠서 해야한다.
+
+생각을 바꿔서 
+<신고된 사람, 신고한 사람 리스트>를 계산하면 간결하다. 
+
+그 이후에 <신고한사람, 메일 받는 횟수>를 계산하면 편하다.
+
+
+# 트리
+데이터를 저장하고 탐색하기에 유용한 구조
+
+## 배열로 표현하기
+- 루트 노드는 배열 인덱스 1번에 저장
+- 왼쪽 자식 노드의 배열 인덱스는 부모 노드의 배열 인덱스 * 2
+- 오른쪽 자식 노드의 배열 인덱스는 부모 노드의 배열 인덱스 * 2 + 1
+
+# 문제 25 트리 순회
+## 코드
+```java
+private static String preorder(int[] nodes, int idx){
+    // 루트, 왼쪽, 오른쪽
+    return nodes[idx] + " " +
+            preorder(nodes, 2*idx +1) +
+            preorder(nodes, 2*idx +2);
+}
+
+```
+
+# 문제 26 예상 대진표
+https://school.programmers.co.kr/learn/courses/30/lessons/12985
+## 문제 분석
+숫자가 /2의 올림이 같으면 같은 대진표가 된다.
+
+## 책의 내용
+ 트리로 생각하면 1라운드에 1~8
+
+2 라운드는 각 1,2 - 3,4 가 대진해서 위로 올라가는 원리
+
+4, 7은 무조건 이긴다는 가정이고 나머지는 뭐가 이기는 상관 없다.
+
+노드 번호로 생각한다.
+## 코드
+```java
+class Solution
+{
+    public int solution(int n, int a, int b)
+    {
+        int answer = 0;
+        while(a!=b){
+            answer++;
+            a = (a+1)/2;
+            b = (b+1)/2;
+        }
+        return answer;
+    }
+}
+```
+
+# 문제 27 다단계 칫솔 판매
+https://school.programmers.co.kr/learn/courses/30/lessons/77486
+
+## 코드
+
+```java
+import java.util.*;
+class Solution {
+    
+    public int[] solution(String[] enroll, String[] referral, String[] seller, int[] amount) {
+        Map<String, String> nodeMap = new HashMap();
+        Map<String, Integer> amountMap = new HashMap();
+        
+        for(int i=0; i<enroll.length; i++){
+            String child = enroll[i];
+            String perent = referral[i];
+            nodeMap.put(child, perent);
+        }
+        
+        for(int i=0; i<seller.length; i++){
+            int revenue = amount[i]*100;
+            
+            for(String child = seller[i]; !child.equals("-") && revenue>0; 
+                child=nodeMap.get(child))
+            {
+                int pay = revenue/10;
+                amountMap.put(child, amountMap.getOrDefault(child, 0)+revenue-pay);
+                revenue = pay;
+            }
+        }
+        int[] answer = new int[enroll.length];
+        for(int i=0; i<enroll.length; i++){
+            answer[i] = amountMap.getOrDefault(enroll[i], 0);
+        }
+        
+        return answer;
+    }
+}
+```

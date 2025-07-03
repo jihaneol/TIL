@@ -1,4 +1,13 @@
 <details>
+<summary> 템플릿 </summary>
+<br>
+<pre>
+
+
+</pre>
+</details>
+
+<details>
 <summary> Spring Data JPA에서 새로운 Entity인지 판단하는 방법은 무엇일까요? </summary>
 <br>
 <pre>
@@ -43,4 +52,15 @@ save 호출 시 isNew 로 merge, persist를 할지를 판단 하는데 id를 직
 
 </pre>
 
+</details>
+
+
+<details>
+<summary> JPA의 ddl-auto 옵션은 각각 어떤 동작을 하고 어떤 상황에서 사용해야 할까요? </summary>
+<br>
+<pre>
+
+
+
+</pre>
 </details>

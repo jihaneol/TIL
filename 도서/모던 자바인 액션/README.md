@@ -67,10 +67,114 @@ Future와 CompletableFuture은 독립적 실행과 병령성이라는 정식적 
 - 이 연결을 구독이라 한다.
 - 이 연결을 이용해 메시지를 전송한다.
 
-<? super T> 는 쓰기 일때 값을 외부로부터 넣을 때 (Consumer), <? extends T> 읽기 전용 값을 외부에서 꺼낼 때 (Producer)
+> '<? super T>' 는 쓰기 일때 값을 외부로부터 넣을 때 (Consumer), 
+>
+> '<? extends T>' 읽기 전용 값을 외부에서 꺼낼 때 (Producer)
 
 onNext는 데이터를 전달하는 용도 업스트림, 다운 스트림
 
 ## 역압력
+
 Subscriber 객체를 어떻게 어떻게 Publisher에게 전달해 발행자가 필요한 메서드를 호출할 수 있는지 살펴봤다.
 
+
+# 16장 CompleatableFuture: 안정적 비동기 프로그래밍
+## 16.1 Future의 단순 활용
+![img.png](img.png)
+
+> 이 시나리오에 문제는 오래 걸리는 작업 끝나지 않으면 우리 스레드가 영원히 끝나지 않는다.
+> 
+> get 메서드를 오버로드해서 우리 스레드가 대기할 최대 타임아웃 시간을 설정해야 한다.
+
+
+## 16.1.1 Future 제한
+두 개의 비동기 계산 결과를 하나로 합칠때 두 가지 작업은 독립적이지만
+
+두 번째 결과가 첫 번째 결과에 의존하는 상황일 수 있다.
+
+## 16.1.2 CompletableFuture로 비동기 애플리케이션 만들기
+동기 API를 사용하는 상황을 블록 호출, 비동기 API를 사용하는 상황을 비블록 호출이라고 한다.
+
+## 예외 처리 
+- Future는 명시적으로 완료 상태를 알려줘야 함
+- 예외가 발생해도 자동으로 완료되지 않음
+- 개발자가 예외 처리 방식을 직접 제어할 수 있게 함
+
+completeExceptionally()는 "이 Future가 예외로 인해 완료되었다"고 알려주는 신호.
+
+## 팩토리 메서드 supplyAsync로 CompletableFuture 만들기
+supplyAsync메서드는 Supplier를 인수로 받아서 ComletableFuture를 반환한다.
+
+ForkJoinPool의 Executor 중 하나가 Supplier를 실행한다. 두 번째 인수로 다른 Executor를 지정할 수 있다.
+
+## 16.3 블록 코드 만들기
+네 개의 상점에 순차적으로 실행하면 4초 이상이 걸린다.
+
+## 16.3.1 병렬 스트림으로 요청 병렬화하기
+병렬 실행시 1초 . 028이 걸린다.
+
+```java
+ public static List<String> findPrice(String product){
+//        return shops.stream()
+//                .map(shop -> String.format("%s price is %.2f",
+//                        shop.getName(), shop.getPrice(product)))
+//                .toList();
+
+    return shops.parallelStream()
+            .map(shop -> String.format("%s price is %.2f",
+                    shop.getName(), shop.getPrice(product)))
+            .toList();
+
+}
+```
+> [BestPrice price is 136.37, LetsSaveBig price is 153.97, MyFavoriteShop price is 142.50, BuyItAll price is 227.55]
+Done in 1028
+
+## 16.3.2 CompletableFuture로 비동기 호출 구현하기
+```java
+ List<CompletableFuture<String>> priceFutures = shops.stream()
+                .map(shop -> CompletableFuture.supplyAsync(() -> String.format("%s price is %.2f",
+                        shop.getName(), shop.getPrice(product))))
+                .toList();
+
+        return priceFutures.stream()
+                .map(CompletableFuture::join) // 모든 비동기 동작이 끝나길 기다린다.
+                .toList();
+```
+두 map 연산을 하나의 스트림 처리 파이프라인으로 처리하지 않은 이유는 스트림 연산은 게으른 특성이 있어서 그렇다.
+![img_1.png](img_1.png)
+
+## 16.3.3 더 확장성이 좋은 해결 방법
+
+병렬 스트림과 CompletableFuture는 내부적으로 `Runtime.getRuntime().availableProcessors()`가 반환한는 스레드 수를 사용하면서 
+비슷한 결과가 된다.
+
+결과는 비슷하지만 CompletableFuture는 병렬 스트림 버전에 비해 작업에 이용할 수 있는 다양한 Executor를 지정이 가능한 장점이 있다.
+
+## 16.3.4. 커스텀 Executor 사용
+> 기본 공통 풀 사용 (CompletableFuture 기본)
+> 병렬 스트림도 내부적으로 ForkJoinPool 사용
+> ForkJoinPool.commonPool()
+> 큰 문제를 작은 문제로 나누어서 병렬 처리하는 데 특화된 스레드 풀
+
+커스텀 Executor를 사용하지 않는다면 아래와 같습니다.
+
+문제점들:
+- Thread 직접 생성: 매번 새 스레드 생성/제거로 오버헤드 큼
+- 기본 풀 사용: 다른 작업들과 스레드 공유해서 성능 영향
+- 리소스 제어 어려움: 스레드 수 제한이 없어서 시스템 부하 위험
+
+```java
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
+private final Executor executor = Executors.newFixedThreadPool(Math.min(shops.size(), 100), new ThreadFactory() {
+    @Override
+    public Thread newThread(@org.jetbrains.annotations.NotNull Runnable r) {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    }
+});
+```
+데몬 스레드를 포함하여 일반 스레드가 실행 중이면 자바 프로램이 종료되지 않기 때문에 데몬 스레드와 같이 강제 종료될 수 있는 스레드를 사용한다.

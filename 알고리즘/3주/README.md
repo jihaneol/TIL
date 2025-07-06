@@ -501,4 +501,47 @@ union-find 알고리즘의 parent 배열이라고 생각하면 된다.
 
 # 문제 30 간단한 유니온-파인드 알고리즘 구현
 
+```java
+class Solution{
+    private static int[] parent;
+    
+    private static int find(int x){
+        if(parent[x]==x)
+            return x;
+        
+        return parent[x] = find(parent[x]);
+    }
+    
+    private static void union(int x, int y){
+        int root1= find(x);
+        int root2 = find(y);
+        
+        parent[root1] = root2;
+        Set<Integer> set = new HashSet();
+        
+        
+    }
+    
+}
 
+```
+
+# 문제 31 폰켓몬
+https://school.programmers.co.kr/learn/courses/30/lessons/1845
+
+## 코드
+```java
+import java.util.*;
+import java.util.stream.*;
+class Solution {
+    public int solution(int[] nums) {
+        // n/2 만큼 가져가고 최대로 가질수있는 개수
+        int max = nums.length/2;
+        Set<Integer> set = 
+            Arrays.stream(nums).boxed().collect(Collectors.toCollection(HashSet::new));
+        
+        
+        return max < set.size() ? max : set.size();
+    }
+}
+```

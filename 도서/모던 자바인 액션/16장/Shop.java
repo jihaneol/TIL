@@ -4,17 +4,24 @@ import java.util.concurrent.Future;
 
 public class Shop {
     private String shopName;
+    private Random random = new Random();
 
     public Shop(String shopName) {
         this.shopName = shopName;
     }
 
-    public double getPrice(String product) {
-        return calculatePrice(product);
+    public String getPrice(String product) {
+        double price = calculatePrice(product);
+        int i = random.nextInt(Discount.Code.values().length);
+        Discount.Code code = Discount.Code.values()[i];
+
+        return String.format("%s:%.2f:%s", shopName, price, code);
+
     }
-    public double calculatePrice(String product) {
+
+    private double calculatePrice(String product) {
         deley();
-        return new Random().nextDouble()*product.charAt(0) + product.charAt(1);
+        return random.nextDouble() * product.charAt(0) + product.charAt(1);
 
     }
 
@@ -31,11 +38,12 @@ public class Shop {
 //        return futurePrice; // 게산 결과가 완료되길 기다리지 않고 Future를 반환한다.
         return CompletableFuture.supplyAsync(() -> calculatePrice(product));
     }
+
     public static void deley() {
         try {
             Thread.sleep(1000L);
 //            throw new InterruptedException("테스트");
-        }catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

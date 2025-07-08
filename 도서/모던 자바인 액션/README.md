@@ -178,3 +178,67 @@ private final Executor executor = Executors.newFixedThreadPool(Math.min(shops.si
 });
 ```
 데몬 스레드를 포함하여 일반 스레드가 실행 중이면 자바 프로램이 종료되지 않기 때문에 데몬 스레드와 같이 강제 종료될 수 있는 스레드를 사용한다.
+
+
+## 16.4 비동기 작업 파이프라인 만들기
+
+shop에서 파싱한것을 Quote클래스로 캡슐화 한다.
+
+## 16.4.2 할인 서비스 사용
+```java
+public static List<String> findPrices(String product){
+        return shops.stream()
+                .map(shop -> shop.getPrice(product)) // shop에서 계산한 가격 String
+                .map(Quote::parse) // 상점에서 반환된 문자열을 Quote 객체로 변환
+                .map(Discount::applyDiscount) // Quote에 할인 적용
+                .toList();
+    }
+```
+- 첫 번째 연산에서는 각 상점을 요청한 제품의 가격과 할인 코드로 변환
+- 두 번째 연산에서는 이들 문자열을 파싱해서 Quote객체를 만든다.
+- 세 번째 연산에서는 원격 Discount 서비스에 접근해서 최종 할인 가격을 계산하고 가격에 대응하는 상점 이름을 포함하는 문자열을 반환한다.
+
+> 이 동작은 5개의 상점을 보는데 상점에 가격 정보를 요청하는데 5초, 할인 코드 적용하는데 5초가 소비되어 10초가 걸린다.
+
+## 16.4.3 동기 작업과 비동기 작업 조합
+
+```java
+public static List<String> findPrice(String product) {
+        List<CompletableFuture<String>> priceFutures = shops.stream()
+                .map(shop -> CompletableFuture.supplyAsync(
+                        () -> shop.getPrice(product), executor)) // shop에서 계산한 가격 String
+                .map(future -> future.thenApply(Quote::parse)) // 상점에서 반환된 문자열을 Quote 객체로 변환
+                .map(future -> future.thenCompose(quote ->
+                        CompletableFuture.supplyAsync(
+                                () -> Discount.applyDiscount(quote), executor))) // Quote에 할인 적용
+                .toList();
+
+        return priceFutures.stream()
+                .map(CompletableFuture::join)
+                .toList();
+    }
+```
+
+![img_2.png](img_2.png)
+
+## CompletableFuture를 조합해서 할인된 가격 계산
+두개의 비동기 동작을 만들 수 있다.
+- 상점에서 가격 정보를 얻어와서 Quote로 변환
+- 변환된 Quote를 Discount 서비스로 전달해서 할인된 최종가격 흭득
+
+
+> thenCompose는 첫 번째 연산의 결과를 두 번째 연산으로 전달한다. 
+> thenComposeAsync를 사용하지 않은 이유는 두 번째 결과는 첫 번째 결과에 의존하므로 thenCompose를 사용했다.
+
+| 메서드                  | 실행 방식                    | 언제 쓰나         |
+| -------------------- | ------------------------ | ------------- |
+| `thenCompose()`      | 이전 작업과 같은 스레드에서 실행될 수 있음 | 빠르고 간단한 로직    |
+| `thenComposeAsync()` | 항상 비동기 실행됨 (다른 스레드에서 실행) | 작업 분리, 병렬성 확보 |
+
+## 16.4.4 독립 CompletableFuture와 비독립 CompletableFuture 합치기
+> 실전에서는 독립적으로 실행된 두 개의 CompletableFuture 결과를 합쳐야 하는 상황이 발생한다.
+> 첫 번째와 상관없이 두 번째를 실행 할 수 있어야한다.
+
+![img_3.png](img_3.png)
+
+

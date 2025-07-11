@@ -239,6 +239,58 @@ public static List<String> findPrice(String product) {
 > 실전에서는 독립적으로 실행된 두 개의 CompletableFuture 결과를 합쳐야 하는 상황이 발생한다.
 > 첫 번째와 상관없이 두 번째를 실행 할 수 있어야한다.
 
+```java
+import java.util.concurrent.CompletableFuture;
+
+Future<Double> futurePriceInUSD =
+        CompletableFuture.supplyAsync(() -> shop.getPrice(product))
+                .thenCombine(
+                        CompletableFuture.supplyAsync(
+                                () -> exchangeService.getRate(Money.EUR, Money.USD)), 
+                        (price, rate) -> price * rate
+                );
+```
+
 ![img_3.png](img_3.png)
 
+
+## 16.4.6 타임아웃 효과적으로 사용하기
+Future의 계산 결과를 읽을 때는 무한정 기다리는 상황이 발생할 수 있어서
+
+블록을 하지 않는 것이 좋다.
+
+### orTimeout
+지정된 시간이 지난 후에 CompletableFuture를 TimeoutException으로 완료하면서 또 다른
+
+CompletableFuture를 반환할 수 있도록 ScheduledThreadExecutor를 활용한다.
+
+### completeOnTimeout
+orTimeout 메서드처럼 CF를 반환하고, 타임 아웃 발생하면 미리 지정된 값을 사용한다.
+
+```java
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
+Future<Double> futurePriceInUSD =
+        CompletableFuture.supplyAsync(() -> shop.getPrice(product))
+                .thenCombine(
+                        CompletableFuture.supplyAsync(
+                                () -> exchangeService.getRate(Money.EUR, Money.USD))
+                                .completeOnTimeout(DEFAULT_RAE, 1, TimeUnit.SECONDS),
+                        (price, rate) -> price * rate
+                )
+                .orTimeout(3, TimeUnit.SECONDS);
+```
+
+> 다음에는 모든 검색 결과가 완료될 때까지 사용자를 기다리게 하지 말고, 이용할 수 있는 가격정보는
+> 즉시 사용자에게 보여줄 수 있게 제공하는 방법을 알아보겠다.
+
+## 16.5 CF의 종료에 대응하는 방법
+thenAccept라는 메서드를 사용해서 구현해보자.
+
+thenAccept()는 각 작업이 완료되는 즉시 후속 처리를 실행할 수 있어서,
+
+join()처럼 모든 작업이 끝날 때까지 기다렸다가 한 번에 처리하는 것보다 빠르게 반응할 수 있습니다.
+
+하나라도 느리면 전체가 지연됨 -> 해결하려면 thenAccept로 바로바로 결과를 소비함
 

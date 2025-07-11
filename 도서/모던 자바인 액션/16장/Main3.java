@@ -49,4 +49,5 @@ public class Main3 {
                 .map(CompletableFuture::join)
                 .toList();
     }
+
 }

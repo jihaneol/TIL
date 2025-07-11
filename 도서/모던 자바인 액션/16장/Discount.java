@@ -14,7 +14,7 @@ public class Discount {
                         quote.getDiscount());
     }
 
-    private static double apply(double price, Code code) {
+    private static double apply(double price, Discount.Code code) {
         deley();
         return price * (100 - code.percentage) / 100;
     }

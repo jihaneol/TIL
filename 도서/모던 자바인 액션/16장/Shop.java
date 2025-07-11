@@ -4,7 +4,7 @@ import java.util.concurrent.Future;
 
 public class Shop {
     private String shopName;
-    private Random random = new Random();
+    private static final Random random = new Random();
 
     public Shop(String shopName) {
         this.shopName = shopName;
@@ -40,8 +40,9 @@ public class Shop {
     }
 
     public static void deley() {
+        int deley = 500 + random.nextInt(2000);
         try {
-            Thread.sleep(1000L);
+            Thread.sleep(deley);
 //            throw new InterruptedException("테스트");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

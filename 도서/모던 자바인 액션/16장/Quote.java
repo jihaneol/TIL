@@ -1,4 +1,3 @@
-import chapter2.DiscountCondition;
 
 public class Quote {
     private final String shopName;

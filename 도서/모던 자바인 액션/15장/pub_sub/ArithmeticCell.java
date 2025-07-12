@@ -12,6 +12,7 @@ public class ArithmeticCell extends SimpleCell{
         onNext(left + this.right);
     }
 
+
     public void setRight(int right) {
        this.right = right;
        onNext(right+ this.left);

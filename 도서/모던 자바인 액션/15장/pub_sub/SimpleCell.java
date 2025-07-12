@@ -14,6 +14,7 @@ public class SimpleCell implements Publisher<Integer>, Subscriber<Integer> {
 
     @Override
     public void subscribe(Subscriber<? super Integer> subscriber) {
+       subscribers.add(subscriber);
         subscribers.add(subscriber);
     }
 
